@@ -18,17 +18,17 @@ namespace FTBackup
             public DateTime lastChange;
         };
 
-        static readonly String tempPath = @"d:\temp\ftbackup_tests\";
-        static readonly FileData[] files = new FileData[] {
-            new FileData { filename=tempPath+@"file1", lastChange = new DateTime(2020, 1, 1, 12, 0, 0 ) },
-            new FileData { filename=tempPath+@"file2", lastChange = new DateTime(2020, 1, 1, 12, 10, 0 ) },
-            new FileData { filename=tempPath+@"file3", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir1\file4", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir1\file5", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir2\file6", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir2\file7", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir1\dir3\dir4\file8", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
-            new FileData { filename=tempPath+@"dir1\dir3\dir4\file9", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
+        static readonly String tempPath = @"c:\temp\ftbackup_tests";
+        static readonly FileData[] testFiles = new FileData[] {
+            new FileData { filename=tempPath+@"\file1.a", lastChange = new DateTime(2020, 1, 1, 12, 0, 0 ) },
+            new FileData { filename=tempPath+@"\file2.b", lastChange = new DateTime(2020, 1, 1, 12, 10, 0 ) },
+            new FileData { filename=tempPath+@"\file3.c", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
+            new FileData { filename=tempPath+@"\dir1\file4.a", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
+            new FileData { filename=tempPath+@"\dir1\file5.b", lastChange = new DateTime(2020, 1, 1, 12, 10, 0 ) },
+            new FileData { filename=tempPath+@"\dir2\file6.a", lastChange = new DateTime(2020, 1, 1, 12, 10, 0 ) },
+            new FileData { filename=tempPath+@"\dir2\file7.b", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
+            new FileData { filename=tempPath+@"\dir1\dir3\dir4\file8.b", lastChange = new DateTime(2020, 1, 1, 12, 10, 0 ) },
+            new FileData { filename=tempPath+@"\dir1\dir3\dir4\file9.c", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
             };
 
         private void CompareFileLists(List<string> files, List<string> expected)
@@ -48,9 +48,9 @@ namespace FTBackup
         public void Setup()
         {
             // Create files and set last update dates.
-            foreach (var f in files)
+            foreach (var f in testFiles)
             {
-                String path = Path.Combine(tempPath, f.filename);
+                String path = f.filename;
                 FileInfo fi = new FileInfo(path);
                 if (!fi.Exists)
                 {
@@ -71,20 +71,123 @@ namespace FTBackup
         public void GetAllFiles()
         {
             FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath);
             FileFilter filter = new FileFilter();
             BackupParameters param = new BackupParameters() { type = EBackupType.Full };
 
             List<String> files = Backup.GetFiles(list, filter, param);
 
-            List<String> expected = new List<string>() {tempPath+@"file1",
-                                                        tempPath+@"file2",
-                                                        tempPath+@"file3",
-                                                        tempPath+@"dir1\file4",
-                                                        tempPath+@"dir1\file5",
-                                                        tempPath+@"dir2\file6",
-                                                        tempPath+@"dir2\file7",
-                                                        tempPath+@"dir1\dir3\dir4\file8",
-                                                        tempPath+@"dir1\dir3\dir4\file9" };
+            List<String> expected = new List<string>();
+            foreach (var f in testFiles)
+                expected.Add(f.filename);
+
+            CompareFileLists(files, expected);
+        }
+
+        [Test]
+        public void GetAllFiles2()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath+@"\dir2");
+            list.Add(tempPath+ @"\dir1\dir3");
+            FileFilter filter = new FileFilter();
+            BackupParameters param = new BackupParameters() { type = EBackupType.Full };
+
+            List<String> files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                            tempPath+@"\dir2\file6.a",
+                            tempPath+@"\dir2\file7.b",
+                            tempPath+@"\dir1\dir3\dir4\file8.b",
+                            tempPath+@"\dir1\dir3\dir4\file9.c",
+            };
+
+            CompareFileLists(files, expected);
+        }
+
+
+        [Test]
+        public void WildcardFilter()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath);
+            FileFilter filter = new FileFilter();
+            filter.Add(@".*\.a");
+            BackupParameters param = new BackupParameters() { type = EBackupType.Full };
+
+            List<String> files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                            //tempPath+@"\file1.a",
+                            tempPath+@"\file2.b",
+                            tempPath+@"\file3.c",
+                            //tempPath+@"\dir1\file4.a",
+                            tempPath+@"\dir1\file5.b",
+                            //tempPath+@"\dir2\file6.a",
+                            tempPath+@"\dir2\file7.b",
+                            tempPath+@"\dir1\dir3\dir4\file8.b",
+                            tempPath+@"\dir1\dir3\dir4\file9.c",
+            };
+
+            CompareFileLists(files, expected);
+        }
+
+        [Test]
+        public void Wildcard2Filter()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath);
+            FileFilter filter = new FileFilter();
+            filter.Add(@".*\.b");
+            filter.Add(@".*\.c");
+            BackupParameters param = new BackupParameters() { type = EBackupType.Full };
+
+            List<String> files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                    tempPath+@"\file1.a",
+                    tempPath+@"\dir1\file4.a",
+                    tempPath+@"\dir2\file6.a",
+            };
+
+            CompareFileLists(files, expected);
+        }
+
+        [Test]
+        public void Incremental()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath);
+            FileFilter filter = new FileFilter();
+            BackupParameters param = new BackupParameters() { type = EBackupType.Incremental, lastBackup = new DateTime(2020, 1, 1, 12, 15, 0) };
+
+            List<String> files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                    tempPath + @"\file3.c",
+                    tempPath + @"\dir1\file4.a",
+                    tempPath + @"\dir2\file7.b",
+                    tempPath + @"\dir1\dir3\dir4\file9.c",
+            };
+
+            CompareFileLists(files, expected);
+        }
+
+        [Test]
+        public void IncrementalFilter()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(tempPath);
+            FileFilter filter = new FileFilter();
+            filter.Add(@".*\.b");
+            filter.Add(@".*\.c");
+            BackupParameters param = new BackupParameters() { type = EBackupType.Incremental, lastBackup = new DateTime(2020, 1, 1, 12, 15, 0) };
+
+            List<String> files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                    tempPath+@"\dir1\file4.a",
+            };
 
             CompareFileLists(files, expected);
         }

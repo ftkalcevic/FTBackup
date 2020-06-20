@@ -14,6 +14,7 @@ namespace FTBackup
 
     public class BackupParameters
     {
-        public EBackupType type;    
+        public EBackupType type;
+        public DateTime lastBackup;
     }
 }

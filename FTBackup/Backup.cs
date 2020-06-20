@@ -9,8 +9,27 @@ namespace FTBackup
 {
     public class Backup
     {
-        private void AppendDirectory(ref List<String> list, FileFilter filter, BackupParameters param, FileInfo f)
+        private static void AppendDirectory(ref List<String> list, FileFilter filter, BackupParameters param, DirectoryInfo di)
         {
+            FileInfo[] files = di.GetFiles();
+            foreach (var f in files)
+            {
+                AppendFile(ref list, filter, param, f);
+            }
+            DirectoryInfo[] dirs = di.GetDirectories();
+            foreach (var d in dirs)
+            {
+                AppendDirectory(ref list, filter, param, d);
+            }
+        }
+
+        private static void AppendFile(ref List<String> list, FileFilter filter, BackupParameters param, FileInfo f)
+        {
+            if ( ( param.type == EBackupType.Incremental && f.LastWriteTime > param.lastBackup ) || param.type == EBackupType.Full )
+                if (!filter.Match(f.Name))
+                {
+                    list.Add(f.FullName);
+                }
         }
 
         public static List<String> GetFiles(FileSelectionList list, FileFilter filter, BackupParameters param)
@@ -22,12 +41,14 @@ namespace FTBackup
                 FileInfo f = new FileInfo(path);
                 if (f.Exists)
                 {
-                    if (f.Attributes.HasFlag(FileAttributes.Directory))
+                    AppendFile(ref files, filter, param, f);
+                }
+                else
+                {
+                    DirectoryInfo d = new DirectoryInfo(path);
+                    if (d.Exists)
                     {
-                        AppendDirectory(ref files, filter, param, f);
-                    }
-                    else
-                    {
+                        AppendDirectory(ref files, filter, param, d);
                     }
                 }
             }
