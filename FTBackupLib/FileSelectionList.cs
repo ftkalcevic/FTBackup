@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FTBackup
+namespace FTBackupLib
 {
     public class FileSelectionList : List<String>
     {

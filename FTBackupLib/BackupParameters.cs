@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FTBackup
+namespace FTBackupLib
 {
     public enum EBackupType
     {
@@ -16,5 +16,13 @@ namespace FTBackup
     {
         public EBackupType type;
         public DateTime lastBackup;
+        public String outputDirectory;
+        public String backupName;
+        public DateTime backupTime;
+
+        public BackupParameters()
+        {
+            backupTime = DateTime.Now;
+        }
     }
 }

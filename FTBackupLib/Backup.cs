@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FTBackup
+namespace FTBackupLib
 {
     public class Backup
     {
@@ -32,6 +33,7 @@ namespace FTBackup
                 }
         }
 
+
         public static List<String> GetFiles(FileSelectionList list, FileFilter filter, BackupParameters param)
         {
             List<String> files = new List<string>();
@@ -53,6 +55,28 @@ namespace FTBackup
                 }
             }
             return files;
+        }
+
+        public static string MakeBackupFilename(BackupParameters param)
+        {
+            string filename = param.backupName + (param.type == EBackupType.Full ? ".Full" : ".Inc") + param.backupTime.ToString(".yyyy-MM-ddTHHmmss") + ".zip";
+            return Path.Combine(param.outputDirectory, filename);
+        }
+
+        public static void DoBackup(List<string> files, BackupParameters param)
+        {
+            string path = MakeBackupFilename(param);
+
+            using (FileStream zipStream = new FileStream(path, FileMode.Create))
+            {
+                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+                {
+                    foreach (var file in files)
+                    {
+                        archive.CreateEntryFromFile(file, file);
+                    }
+                }
+            }
         }
     }
 }

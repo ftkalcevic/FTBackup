@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace FTBackup
+namespace FTBackupLib
 {
 
-    class Filter
+    public class Filter
     {
         public string filter;
         public Regex ex;
