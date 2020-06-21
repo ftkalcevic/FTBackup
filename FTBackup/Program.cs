@@ -88,6 +88,13 @@ FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBack
                 }
                 index++;
             }
+            System.Console.WriteLine("Backup Starting...");
+            System.Console.WriteLine($"Backup Name      {param.backupName}");
+            System.Console.WriteLine($"Backup Time      {param.backupTime}");
+            System.Console.WriteLine($"Last Backup Time {param.lastBackup}");
+            System.Console.WriteLine($"Output Directory {param.outputDirectory}");
+            System.Console.WriteLine($"Backup Type      {param.type}");
+
             return param;
         }
 
@@ -114,6 +121,7 @@ FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBack
 
         static void Main(string[] args)
         {
+            System.Console.WriteLine(System.Environment.CommandLine);
             BackupParameters param = ProcessCommandLine(args);
             Backup b = new Backup();
             b.BackupErrorMessage += new Backup.BackupErrorMessageDelegate(BackupErrorMessageHandler);
@@ -125,3 +133,11 @@ FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBack
         }
     }
 }
+
+/*
+
+Todo...
+- Volume Shadow Copy support 
+- Better, faster exclusion list support
+    - .gitignore like.
+ */
