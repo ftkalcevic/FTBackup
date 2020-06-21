@@ -10,7 +10,7 @@ namespace FTBackupLib
 {
     public class Backup
     {
-        private static void AppendDirectory(ref List<String> list, FileFilter filter, BackupParameters param, DirectoryInfo di)
+        private static void AppendDirectory(ref FileList list, FileFilter filter, BackupParameters param, DirectoryInfo di)
         {
             FileInfo[] files = di.GetFiles();
             foreach (var f in files)
@@ -24,7 +24,7 @@ namespace FTBackupLib
             }
         }
 
-        private static void AppendFile(ref List<String> list, FileFilter filter, BackupParameters param, FileInfo f)
+        private static void AppendFile(ref FileList list, FileFilter filter, BackupParameters param, FileInfo f)
         {
             if ( ( param.type == EBackupType.Incremental && f.LastWriteTime > param.lastBackup ) || param.type == EBackupType.Full )
                 if (!filter.Match(f.Name))
@@ -34,9 +34,9 @@ namespace FTBackupLib
         }
 
 
-        public static List<String> GetFiles(FileSelectionList list, FileFilter filter, BackupParameters param)
+        public static FileList GetFiles(FileSelectionList list, FileFilter filter, BackupParameters param)
         {
-            List<String> files = new List<string>();
+            FileList files = new FileList();
 
             foreach (var path in list)
             {
@@ -63,7 +63,7 @@ namespace FTBackupLib
             return Path.Combine(param.outputDirectory, filename);
         }
 
-        public static void DoBackup(List<string> files, BackupParameters param)
+        public static void DoBackup(FileList files, BackupParameters param)
         {
             string path = MakeBackupFilename(param);
 

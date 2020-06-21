@@ -93,7 +93,7 @@ FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBack
         static void Main(string[] args)
         {
             BackupParameters param = ProcessCommandLine(args);
-            List<string> files = Backup.GetFiles(selectionList, filter, param);
+            FileList files = Backup.GetFiles(selectionList, filter, param);
             Backup.DoBackup(files, param);
         }
     }

@@ -33,11 +33,13 @@ namespace FTBackupLib
             new FileData { filename=testPath+@"\dir1\dir3\dir4\file9.c", lastChange = new DateTime(2020, 1, 1, 12, 20, 0 ) },
             };
 
-        private void CompareFileLists(List<string> files, List<string> expected)
+        private void CompareFileLists(FileList files, List<string> expected)
         {
             Assert.AreEqual(expected.Count, files.Count, "Number of files found does not match");
 
-            HashSet<string> fileSet = new HashSet<string>(files);
+            HashSet<string> fileSet = new HashSet<string>();
+            foreach (var f in files)
+                fileSet.Add(f);
 
             foreach (var file in expected)
             {
@@ -79,7 +81,7 @@ namespace FTBackupLib
             FileFilter filter = new FileFilter();
             BackupParameters param = new BackupParameters() { type = EBackupType.Full };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>();
             foreach (var f in testFiles)
@@ -97,7 +99,7 @@ namespace FTBackupLib
             FileFilter filter = new FileFilter();
             BackupParameters param = new BackupParameters() { type = EBackupType.Full };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>() {
                             testPath+@"\dir2\file6.a",
@@ -119,7 +121,7 @@ namespace FTBackupLib
             filter.Add(@".*\.a");
             BackupParameters param = new BackupParameters() { type = EBackupType.Full };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>() {
                             //tempPath+@"\file1.a",
@@ -146,7 +148,7 @@ namespace FTBackupLib
             filter.Add(@".*\.c");
             BackupParameters param = new BackupParameters() { type = EBackupType.Full };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>() {
                     testPath+@"\file1.a",
@@ -165,7 +167,7 @@ namespace FTBackupLib
             FileFilter filter = new FileFilter();
             BackupParameters param = new BackupParameters() { type = EBackupType.Incremental, lastBackup = new DateTime(2020, 1, 1, 12, 15, 0) };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>() {
                     testPath + @"\file3.c",
@@ -187,7 +189,7 @@ namespace FTBackupLib
             filter.Add(@".*\.c");
             BackupParameters param = new BackupParameters() { type = EBackupType.Incremental, lastBackup = new DateTime(2020, 1, 1, 12, 15, 0) };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
 
             List<String> expected = new List<string>() {
                     testPath+@"\dir1\file4.a",
@@ -220,8 +222,26 @@ namespace FTBackupLib
             FileFilter filter = new FileFilter();
             BackupParameters param = new BackupParameters() { type = EBackupType.Full, outputDirectory = outputPath, backupName = "GetAllFilesZip", backupTime = new DateTime(2020,1,1,13,0,0) };
 
-            List<String> files = Backup.GetFiles(list, filter, param);
+            FileList files = Backup.GetFiles(list, filter, param);
             Backup.DoBackup(files, param);
+        }
+
+        [Test]
+        public void DuplicateFiles()
+        {
+            FileSelectionList list = new FileSelectionList();
+            list.Add(testPath+@"\file3.c");
+            list.Add(testPath + @"\file3.c");
+            FileFilter filter = new FileFilter();
+            BackupParameters param = new BackupParameters() { type = EBackupType.Full };
+
+            FileList files = Backup.GetFiles(list, filter, param);
+
+            List<String> expected = new List<string>() {
+                    testPath+@"\file3.c",
+            };
+
+            CompareFileLists(files, expected);
         }
     }
 }
