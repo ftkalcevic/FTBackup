@@ -1,2 +1,13 @@
 .*\.bak
 .*\.obj
+.*\.exp
+.*\.ilk
+.*\.lib
+.*\.pdb
+.*\\bin\\Debug\\.*
+.*\\Debug\\.*
+.*\\bin\\Release\\.*
+.*\\Release\\.*
+.*\\obj\\.*
+.*\\packages\\.*
+.*\\.vs\\.*

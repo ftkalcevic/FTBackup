@@ -12,6 +12,7 @@ namespace FTBackup
     {
         static FileFilter filter = new FileFilter();
         static FileSelectionList selectionList = new FileSelectionList();
+        static bool error=true;
 
         static string helpText = @"Usage:
 FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBackup datetime --outputPath directory --backupName filenamePrefix";
@@ -90,11 +91,37 @@ FTBackup --type [Full|Incremental] --fileList file --excludeList file --lastBack
             return param;
         }
 
+        static void BackupUpdateHandler(int done, int steps)
+        {
+            if (error)
+            {
+                System.Console.WriteLine("|----:----|----:----|----:----|----:----|----:----|");
+                for ( int i = 0; i < done; i++ )
+                    System.Console.Write(".");
+            }
+            else
+            {
+                System.Console.Write(".");
+            }
+            error = false;
+        }
+
+        static void BackupErrorMessageHandler(string message)
+        {
+            System.Console.WriteLine(message);
+            error = true;
+        }
+
         static void Main(string[] args)
         {
             BackupParameters param = ProcessCommandLine(args);
-            FileList files = Backup.GetFiles(selectionList, filter, param);
-            Backup.DoBackup(files, param);
+            Backup b = new Backup();
+            b.BackupErrorMessage += new Backup.BackupErrorMessageDelegate(BackupErrorMessageHandler);
+            b.BackupUpdate += new Backup.BackupUpdateDelegate(BackupUpdateHandler);
+
+            FileList files = b.GetFiles(selectionList, filter, param);
+            System.Console.WriteLine($"Backing Up {files.Count:n0} files {files.totalBytes:n0} bytes"); 
+            b.DoBackup(files, param);
         }
     }
 }

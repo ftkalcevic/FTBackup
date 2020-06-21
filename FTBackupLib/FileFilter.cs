@@ -26,7 +26,10 @@ namespace FTBackupLib
         }
         public void Add(string filter)
         {
-            filters.Add(new Filter() { filter = filter, ex = new Regex(filter) });
+            filter = filter.Trim();
+            if (filter.Length == 0)
+                return;
+            filters.Add(new Filter() { filter = filter, ex = new Regex(filter,RegexOptions.IgnoreCase) });
         }
     }
 }
