@@ -51,6 +51,10 @@ namespace FTBackupLib
         [SetUp]
         public void Setup()
         {
+            // Remove old files
+            if (Directory.Exists(testPath))
+                Directory.Delete(testPath, true);
+
             // Create files and set last update dates.
             foreach (var f in testFiles)
             {
